@@ -25,10 +25,65 @@ You can do numbers like this:
 
 See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
 
+## Preprocessing
+Here's our first code chunk. This loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
+User should input the year, name of the variable, coordinates of the weather station and directory of the files.
+```{r message=F, warning=F, results='hide'}
+##########
+#Packages#
+##########
+library(raster)     # managing rasters
+library(rgdal)      # managing rasters
+library(lubridate)  # managing date formats
 
-Here's my first code chunk.
-```{r}
-1+2
+runn=F
+if(runn){
+  Yr<- 2018
+  par<- 'skt'     # the variable you are interested in,
+                  # and you have it available on your disk
+  
+  xy= cbind(-78.7358, 42.9408)  # Coordinates of the weather station
+                                # this is Buffalo's Niagara International Airport
+
+  # This data frame will be used for time-series plots
+  daily_df= data.frame(Date= as.Date(character()),
+                       Mean= numeric(),
+                       Min= numeric(),
+                       Max= numeric(),
+                       stringsAsFactors = FALSE)
+  monthly_bricks= list()
+  monthly_mean= list()
+  monthly_min= list()
+  monthly_max= list()
+
+  for(y in c(Yr)){
+    for(M in 1:12){
+      month_path= paste0('PATH TO THE FILES','/Y',Yr,'/M',
+                         sprintf("%02d", as.numeric(M)),'/')
+      ls= list.files(month_path, recursive = TRUE)
+      l= length(ls)
+      n= nrow(daily_df)
+      everyday_bricks= list()
+    
+    
+    for(i in c(1:l)){
+      f_name= paste0(month_path,ls[i])
+      day_brick= brick(f_name, varname= par)
+      daily_df[n+i,1]= as.Date(substr(f_name,nchar(f_name)-10,nchar(f_name)-3), "%Y%m%d")
+      daily_df[n+i,2]= extract(calc(day_brick, mean), xy, method='simple')
+      daily_df[n+i,3]= extract(calc(day_brick, min), xy, method='simple')
+      daily_df[n+i,4]= extract(calc(day_brick, max), xy, method='simple')
+      
+      everyday_bricks[i]= day_brick
+    }
+    monthly_bricks[M]= brick(everyday_bricks)
+    monthly_mean[M]= calc(monthly_bricks[[M]],mean)
+    monthly_min[M]= calc(monthly_bricks[[M]],min)
+    monthly_max[M]= calc(monthly_bricks[[M]],max)
+    }
+  }
+}
+
 ```
 
 Load any required packages in a code chunk (you may need to install some packages):
