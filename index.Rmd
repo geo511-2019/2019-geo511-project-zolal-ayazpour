@@ -1,41 +1,49 @@
 ---
-title: "I have the best titles"
-author: Your name here
-subtitle: Subtitle here if desired
+title: "COPMARISON OF DIFFERENT CLIMATE DATASETS"
+author: Nima Masoudvaziri, Zolal Ayazpour
+output: 
+  html_document:
+    code_folding: hide
 ---
-
+  
 # Introduction
-My really awesome and complete introduction will go here.  
+When studying atmospheric-related phenomena, one may use observations (like data from weather stations) or simulated datasets based on numerical models. Also, one may want to investigate and explore a phenomenon or behavior which has happened already in the past, or may be interested in prediction of an event or behavior. As a result, different datasets should be incorporated given the nature of the study.
+Essentially, there are three types of models: Forecast, Analysis and Reanalysis. Forecast models are comprised of physics-based equations and propogate an atmospheric state forward in time, i.e. given the vaules of different parameters at time t, one can calculate the values for time t+dt. Analysis basically does the same thing, however instead of the prediction by physics, it takes place by statistical methods. In other words, given the observations at some locations, one can come up with an estimation for different parameters at locations that there is no observation available. There are different physics-based models and also different assumptions and methodologies in data assimilation, which experience modifications along the time. Besides, instrumnetation also changes as time passes and technology improves. Reanalysis takes all these variations into account and yield a comprehensive and coherent dataset over the globe. It is supposedly the best dataset for looking into the past weather. More infomation can be found [here](https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf).
+
+# Definition of the Problem
+For this study, among different publicly available models, two will be considered. The main objective of the work is to compare their dataset for some primary climatological variables (precipitation, temperature, wind, snow), within both temporal and spatial scopes.
+One of the models is called High Resolution Rapid Refresh (HRRR) which is a forecast model (with forecast length of 18 hours) generating data to a 3-km resolution grid, hourly. More information about HRRR can be find [here](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html). The other model to use is ERA5 which is a climate reanlysis dataset of up to 3 month before  with 30-km resolution at an hourly frequency. More information about ERA5 dataset can be found [here](https://confluence.ecmwf.int/display/CKB/ERA5). Summry of the models are provided in the following table.
+
+|Model|Type|Resolution|Frequency|
+  |-----|----|----------|---------|
+  |**HRRR**|forecast|3 km|hourly|
+  |**ERA5**|reanlaysis|30 km|hourly|
+  
+  The main reason for choosing these two models is that one of them has a significantly higher resolution and, on the other hand, the other is supposedly based on a more powerful model.
 
 # Materials and methods
+### Materials
 
-Narrative and most code will go here.  Describe what you are doing and show how to do it (with code).
+Each model has its own archive and support, accessible by public. HRRR data can be found following [this instruction](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi), and ERA5 can be downloaded following [this instruction](https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5).
+Also, observations from weather stations can be found from [NOAA LCD Tool](https://www.ncdc.noaa.gov/cdo-web/datatools/lcd).
 
-You can do bullets like this:
+### Methods
 
-* The first most important thing
-* The second most important thing
-* The third most important thing
+The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for two years. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and statistical characteristics of them are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over two years as a gif using gganimate package to provide a general understanding of the models' outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.
 
-You can do numbers like this:
 
-1. The first most important thing
-2. The second most important thing
-3. The third most important thing
-
-See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
-
-## Preprocessing
-Here's our first code chunk. This loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
-User should input the year, name of the variable, coordinates of the weather station and directory of the files.
-```{r message=F, warning=F, results='hide'}
-##########
-#Packages#
-##########
+### Preprocessing
+Here is the required packages to preprocess the data.
+```{r, message=F, warning=F}
 library(raster)     # managing rasters
 library(rgdal)      # managing rasters
 library(lubridate)  # managing date formats
+knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+```
 
+The following code loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
+User should input the year, name of the variable, coordinates of the weather station and directory of the files.
+```{r message=F, warning=F, results='hide'}
 runn=F
 if(runn){
   Yr<- 2018
@@ -76,6 +84,7 @@ if(runn){
       
       everyday_bricks[i]= day_brick
     }
+    # Rasters below will be used to generate maps.
     monthly_bricks[M]= brick(everyday_bricks)
     monthly_mean[M]= calc(monthly_bricks[[M]],mean)
     monthly_min[M]= calc(monthly_bricks[[M]],min)
@@ -86,58 +95,93 @@ if(runn){
 
 ```
 
-Load any required packages in a code chunk (you may need to install some packages):
+The following code loads the HRRR data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains a raster (correponding to an hour of a day) for the variable that you specify.
+Again, user should input the year, name of the variable, coordinates of the weather station and directory of the files.
+```{r message=F, warning=F, results='hide'}
+runn=F
+if(runn){
+  Yr<- 2018
+  par<- 'TMP_surface'     # the variable you are interested in,
+                          # and you have it available on your disk
+  
+  xy= cbind(-78.7358, 42.9408)  # Coordinates of the weather station
+                                # this is Buffalo's Niagara International Airport
+  
+  ny <- extent(-81, -70, 39.5, 46) # bounding box of the New York State
 
-```{r, message=F, warning=F}
-library(tidyverse)
-library(leaflet)
-library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+  # This data frame will be used for time-series plots
+  for(Y in c(Yr)){
+    daily_df= data.frame(Date= as.Date(character()),
+                        Mean= numeric(),
+                        Min= numeric(),
+                        Max= numeric(),
+                        stringsAsFactors = FALSE)
+    monthly_bricks= list()
+    monthly_mean= list()
+    monthly_min= list()
+    monthly_max= list()
+  
+    for(M in c(1:12)){
+      data_path= paste0(getwd(),'/')
+      month_path=paste0('HRRRfromPando_',Y,sprintf("%02d", as.numeric(M)))
+      par_path=paste0(par)
+      ls= list.files(data_path,month_path)
+      ls=ls[grep(par_path,ls)]
+      l= length(ls)/24  
+      n= nrow(daily_df)
+      everyday_bricks=list()
+    
+      for(D in c(1:l)){
+        day_path=paste0(month_path,sprintf("%02d", as.numeric(D)))
+        ls_day= ls[grepl(day_path,ls)]
+        l_hr=length(ls_day)
+        day_list=list()     
+      
+        for(hr in c(1:l_hr)){
+          file_path=paste0(data_path,ls_day[hr])
+          day_list[hr]=try(raster(file_path),silent=TRUE)
+        }
+      
+        for(fn in day_list){
+          if (is.character(fn)){
+            day_list[which(day_list==fn)]=NULL
+          }
+        }
+    
+      day_brick=brick(day_list)
+      
+      f_name= paste0(day_path)
+      
+      daily_df[n+D,1]= as.Date(substr(f_name,nchar(f_name)-7,nchar(f_name)), "%Y%m%d")
+      daily_df[n+D,2]= extract(calc(day_brick, mean), xy, method='simple')
+      daily_df[n+D,3]= extract(calc(day_brick, min), xy, method='simple')
+      daily_df[n+D,4]= extract(calc(day_brick, max), xy, method='simple')
+      
+      everyday_bricks[D]= day_brick
+      }
+      
+      # Rasters below will be used to generate maps.
+      monthly_bricks[M]= brick(everyday_bricks)
+      monthly_mean[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],mean),crs="+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0"), ny)
+      monthly_min[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],min),crs="+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0"), ny)
+      monthly_max[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],max),crs="+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0"), ny)
+    }
+  }
+}
 ```
-
-## Download and clean all required data
-```{r}
-n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))
-```
-
-```{r, results='asis'}
-data %>% 
-  slice(1:10) %>% #show only 1:n rows
-  kable(digits=2,align="c")%>% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
-```
-
-Add any additional processing steps here.
 
 # Results
 
-Show tables, plots, etc. and describe them.
-
-```{r, fig.width=6, fig.height=3, fig.cap="Map of completely random data"}
-m <- leaflet(data) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %>% 
-  addPopups(~x[2], ~y[2], "Random popup")
-m  # a map with the default OSM tile layer
-```
-
-
-```{r}
-data %>% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()
-```
+In progress...
 
 # Conclusions
 
-What have you learned?  Are there any broader implications?
+In progress...
 
 # References
