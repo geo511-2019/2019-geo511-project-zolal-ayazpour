@@ -10,12 +10,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Your name here" />
+<meta name="author" content="Nima Masoudvaziri, Zolal Ayazpour" />
 
 
-<title>I have the best titles</title>
+<title>COPMARISON OF DIFFERENT CLIMATE DATASETS</title>
 
-<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/simplex.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -25,17 +25,9 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
-<script src="site_libs/htmlwidgets-1.3/htmlwidgets.js"></script>
-<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script>
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-binding-2.0.2/leaflet.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -259,6 +251,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -365,277 +360,207 @@ div.tocify {
 
 <div class="fluid-row" id="header">
 
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">I have the best titles</h1>
-<h3 class="subtitle">Subtitle here if desired</h3>
-<h4 class="author">Your name here</h4>
+
+<h1 class="title toc-ignore">COPMARISON OF DIFFERENT CLIMATE DATASETS</h1>
+<h4 class="author">Nima Masoudvaziri, Zolal Ayazpour</h4>
 
 </div>
 
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>My really awesome and complete introduction will go here.</p>
+<p>When studying atmospheric-related phenomena, one may use observations (like data from weather stations) or simulated datasets based on numerical models. Also, one may want to investigate and explore a phenomenon or behavior which has happened already in the past, or may be interested in prediction of an event or behavior. As a result, different datasets should be incorporated given the nature of the study. Essentially, there are three types of models: Forecast, Analysis and Reanalysis. Forecast models are comprised of physics-based equations and propogate an atmospheric state forward in time, i.e. given the vaules of different parameters at time t, one can calculate the values for time t+dt. Analysis basically does the same thing, however instead of the prediction by physics, it takes place by statistical methods. In other words, given the observations at some locations, one can come up with an estimation for different parameters at locations that there is no observation available. There are different physics-based models and also different assumptions and methodologies in data assimilation, which experience modifications along the time. Besides, instrumnetation also changes as time passes and technology improves. Reanalysis takes all these variations into account and yield a comprehensive and coherent dataset over the globe. It is supposedly the best dataset for looking into the past weather. More infomation can be found <a href="https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf">here</a>.</p>
 </div>
-<div id="materials-and-methods" class="section level1">
-<h1>Materials and methods</h1>
-<p>Narrative and most code will go here. Describe what you are doing and show how to do it (with code).</p>
-<p>You can do bullets like this:</p>
-<ul>
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ul>
-<p>You can do numbers like this:</p>
-<ol style="list-style-type: decimal">
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ol>
-<p>See <a href="http://rmarkdown.rstudio.com/">http://rmarkdown.rstudio.com/</a> for all the amazing things you can do.</p>
-<p>Here’s my first code chunk.</p>
-<pre class="r"><code>1+2</code></pre>
-<pre><code>## [1] 3</code></pre>
-<p>Load any required packages in a code chunk (you may need to install some packages):</p>
-<pre class="r"><code>library(tidyverse)
-library(leaflet)
-library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling</code></pre>
-<div id="download-and-clean-all-required-data" class="section level2">
-<h2>Download and clean all required data</h2>
-<pre class="r"><code>n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))</code></pre>
-<pre class="r"><code>data %&gt;% 
-  slice(1:10) %&gt;% #show only 1:n rows
-  kable(digits=2,align=&quot;c&quot;)%&gt;% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;)) #apply other formatting</code></pre>
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<div id="definition-of-the-problem" class="section level1">
+<h1>Definition of the Problem</h1>
+<p>For this study, among different publicly available models, two will be considered. The main objective of the work is to compare their dataset for some primary climatological variables (precipitation, temperature, wind, snow), within both temporal and spatial scopes. One of the models is called High Resolution Rapid Refresh (HRRR) which is a forecast model (with forecast length of 18 hours) generating data to a 3-km resolution grid, hourly. More information about HRRR can be find <a href="http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html">here</a>. The other model to use is ERA5 which is a climate reanlysis dataset of up to 3 month before with 30-km resolution at an hourly frequency. More information about ERA5 dataset can be found <a href="https://confluence.ecmwf.int/display/CKB/ERA5">here</a>. Summry of the models are provided in the following table.</p>
+<table>
 <thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-y
-</th>
-<th style="text-align:center;">
-size
-</th>
-<th style="text-align:center;">
-category
-</th>
-<th style="text-align:center;">
-value
-</th>
+<tr class="header">
+<th>Model</th>
+<th>Type</th>
+<th>Resolution</th>
+<th>Frequency</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td style="text-align:center;">
-139.23
-</td>
-<td style="text-align:center;">
--54.68
-</td>
-<td style="text-align:center;">
-14.99
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--0.63
-</td>
+<tr class="odd">
+<td><strong>HRRR</strong></td>
+<td>forecast</td>
+<td>3 km</td>
+<td>hourly</td>
 </tr>
-<tr>
-<td style="text-align:center;">
--23.85
-</td>
-<td style="text-align:center;">
-57.77
-</td>
-<td style="text-align:center;">
-9.44
-</td>
-<td style="text-align:center;">
-b
-</td>
-<td style="text-align:center;">
--1.50
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-15.39
-</td>
-<td style="text-align:center;">
-29.60
-</td>
-<td style="text-align:center;">
-13.87
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
-1.00
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-57.91
-</td>
-<td style="text-align:center;">
-53.76
-</td>
-<td style="text-align:center;">
-11.70
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
-1.57
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-140.72
-</td>
-<td style="text-align:center;">
-0.13
-</td>
-<td style="text-align:center;">
-12.42
-</td>
-<td style="text-align:center;">
-d
-</td>
-<td style="text-align:center;">
-0.58
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--160.68
-</td>
-<td style="text-align:center;">
--21.50
-</td>
-<td style="text-align:center;">
-10.41
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--0.61
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--119.69
-</td>
-<td style="text-align:center;">
-54.87
-</td>
-<td style="text-align:center;">
-15.46
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--1.23
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-172.00
-</td>
-<td style="text-align:center;">
--55.50
-</td>
-<td style="text-align:center;">
-10.89
-</td>
-<td style="text-align:center;">
-b
-</td>
-<td style="text-align:center;">
--0.31
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-112.69
-</td>
-<td style="text-align:center;">
-16.74
-</td>
-<td style="text-align:center;">
-15.64
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
-0.29
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--51.53
-</td>
-<td style="text-align:center;">
-59.49
-</td>
-<td style="text-align:center;">
-19.78
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
-0.73
-</td>
+<tr class="even">
+<td><strong>ERA5</strong></td>
+<td>reanlaysis</td>
+<td>30 km</td>
+<td>hourly</td>
 </tr>
 </tbody>
 </table>
-<p>Add any additional processing steps here.</p>
+<p>The main reason for choosing these two models is that one of them has a significantly higher resolution and, on the other hand, the other is supposedly based on a more powerful model.</p>
+</div>
+<div id="materials-and-methods" class="section level1">
+<h1>Materials and methods</h1>
+<div id="materials" class="section level3">
+<h3>Materials</h3>
+<p>Each model has its own archive and support, accessible by public. HRRR data can be found following <a href="http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi">this instruction</a>, and ERA5 can be downloaded following <a href="https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5">this instruction</a>. Also, observations from weather stations can be found from <a href="https://www.ncdc.noaa.gov/cdo-web/datatools/lcd">NOAA LCD Tool</a>.</p>
+</div>
+<div id="methods" class="section level3">
+<h3>Methods</h3>
+<p>The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for two years. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and statistical characteristics of them are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over two years as a gif using gganimate package to provide a general understanding of the models’ outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.</p>
+</div>
+<div id="preprocessing" class="section level3">
+<h3>Preprocessing</h3>
+<p>Here is the required packages to preprocess the data.</p>
+<pre class="r"><code>library(raster)     # managing rasters
+library(rgdal)      # managing rasters
+library(lubridate)  # managing date formats
+knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling</code></pre>
+<p>The following code loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify. User should input the year, name of the variable, coordinates of the weather station and directory of the files.</p>
+<pre class="r"><code>runn=F
+if(runn){
+  Yr&lt;- 2018
+  par&lt;- &#39;skt&#39;     # the variable you are interested in,
+                  # and you have it available on your disk
+  
+  xy= cbind(-78.7358, 42.9408)  # Coordinates of the weather station
+                                # this is Buffalo&#39;s Niagara International Airport
+
+  # This data frame will be used for time-series plots
+  daily_df= data.frame(Date= as.Date(character()),
+                       Mean= numeric(),
+                       Min= numeric(),
+                       Max= numeric(),
+                       stringsAsFactors = FALSE)
+  monthly_bricks= list()
+  monthly_mean= list()
+  monthly_min= list()
+  monthly_max= list()
+
+  for(y in c(Yr)){
+    for(M in 1:12){
+      month_path= paste0(&#39;PATH TO THE FILES&#39;,&#39;/Y&#39;,Yr,&#39;/M&#39;,
+                         sprintf(&quot;%02d&quot;, as.numeric(M)),&#39;/&#39;)
+      ls= list.files(month_path, recursive = TRUE)
+      l= length(ls)
+      n= nrow(daily_df)
+      everyday_bricks= list()
+    
+    
+    for(i in c(1:l)){
+      f_name= paste0(month_path,ls[i])
+      day_brick= brick(f_name, varname= par)
+      daily_df[n+i,1]= as.Date(substr(f_name,nchar(f_name)-10,nchar(f_name)-3), &quot;%Y%m%d&quot;)
+      daily_df[n+i,2]= extract(calc(day_brick, mean), xy, method=&#39;simple&#39;)
+      daily_df[n+i,3]= extract(calc(day_brick, min), xy, method=&#39;simple&#39;)
+      daily_df[n+i,4]= extract(calc(day_brick, max), xy, method=&#39;simple&#39;)
+      
+      everyday_bricks[i]= day_brick
+    }
+    # Rasters below will be used to generate maps.
+    monthly_bricks[M]= brick(everyday_bricks)
+    monthly_mean[M]= calc(monthly_bricks[[M]],mean)
+    monthly_min[M]= calc(monthly_bricks[[M]],min)
+    monthly_max[M]= calc(monthly_bricks[[M]],max)
+    }
+  }
+}</code></pre>
+<p>The following code loads the HRRR data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains a raster (correponding to an hour of a day) for the variable that you specify. Again, user should input the year, name of the variable, coordinates of the weather station and directory of the files.</p>
+<pre class="r"><code>runn=F
+if(runn){
+  Yr&lt;- 2018
+  par&lt;- &#39;TMP_surface&#39;     # the variable you are interested in,
+                          # and you have it available on your disk
+  
+  xy= cbind(-78.7358, 42.9408)  # Coordinates of the weather station
+                                # this is Buffalo&#39;s Niagara International Airport
+  
+  ny &lt;- extent(-81, -70, 39.5, 46) # bounding box of the New York State
+
+  # This data frame will be used for time-series plots
+  for(Y in c(Yr)){
+    daily_df= data.frame(Date= as.Date(character()),
+                        Mean= numeric(),
+                        Min= numeric(),
+                        Max= numeric(),
+                        stringsAsFactors = FALSE)
+    monthly_bricks= list()
+    monthly_mean= list()
+    monthly_min= list()
+    monthly_max= list()
+  
+    for(M in c(1:12)){
+      data_path= paste0(getwd(),&#39;/&#39;)
+      month_path=paste0(&#39;HRRRfromPando_&#39;,Y,sprintf(&quot;%02d&quot;, as.numeric(M)))
+      par_path=paste0(par)
+      ls= list.files(data_path,month_path)
+      ls=ls[grep(par_path,ls)]
+      l= length(ls)/24  
+      n= nrow(daily_df)
+      everyday_bricks=list()
+    
+      for(D in c(1:l)){
+        day_path=paste0(month_path,sprintf(&quot;%02d&quot;, as.numeric(D)))
+        ls_day= ls[grepl(day_path,ls)]
+        l_hr=length(ls_day)
+        day_list=list()     
+      
+        for(hr in c(1:l_hr)){
+          file_path=paste0(data_path,ls_day[hr])
+          day_list[hr]=try(raster(file_path),silent=TRUE)
+        }
+      
+        for(fn in day_list){
+          if (is.character(fn)){
+            day_list[which(day_list==fn)]=NULL
+          }
+        }
+    
+      day_brick=brick(day_list)
+      
+      f_name= paste0(day_path)
+      
+      daily_df[n+D,1]= as.Date(substr(f_name,nchar(f_name)-7,nchar(f_name)), &quot;%Y%m%d&quot;)
+      daily_df[n+D,2]= extract(calc(day_brick, mean), xy, method=&#39;simple&#39;)
+      daily_df[n+D,3]= extract(calc(day_brick, min), xy, method=&#39;simple&#39;)
+      daily_df[n+D,4]= extract(calc(day_brick, max), xy, method=&#39;simple&#39;)
+      
+      everyday_bricks[D]= day_brick
+      }
+      
+      # Rasters below will be used to generate maps.
+      monthly_bricks[M]= brick(everyday_bricks)
+      monthly_mean[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],mean),crs=&quot;+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0&quot;), ny)
+      monthly_min[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],min),crs=&quot;+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0&quot;), ny)
+      monthly_max[M]= crop(projectRaster(
+        calc(monthly_bricks[[M]],max),crs=&quot;+proj=longlat +datum=WGS84 +ellps=WGS84
+        +towgs84=0,0,0&quot;), ny)
+    }
+  }
+}</code></pre>
 </div>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
-<p>Show tables, plots, etc. and describe them.</p>
-<pre class="r"><code>m &lt;- leaflet(data) %&gt;% 
-  addTiles() %&gt;% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %&gt;% 
-  addPopups(~x[2], ~y[2], &quot;Random popup&quot;)
-m  # a map with the default OSM tile layer</code></pre>
-<div class="figure">
-<div id="htmlwidget-2f48746e411f6e4db9eb" style="width:576px;height:288px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2f48746e411f6e4db9eb">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[-54.6815718803555,57.7662381436676,29.5982528105378,53.764838045463,0.132622662931681,-21.4973306190223,54.871039185673,-55.5043270066381,16.7375200241804,59.4947509467602,-24.3718888331205,-6.9443532731384,39.5693225227296,28.8309881743044,32.5247023813426,27.4136764090508,-43.528526192531,48.8146031834185,23.6315649189055,-28.8614142592996],[139.225117815658,-23.8489389047027,15.386327393353,57.9123948421329,140.7192150224,-160.678998213261,-119.692128729075,172.001059027389,112.690778737888,-51.5270964615047,171.574504980817,90.8374860696495,29.0291015803814,14.0266442298889,71.6792778577656,179.482292504981,-125.641136560589,105.723939472809,54.6907530259341,171.283272234723],[14.9878433567937,9.44128795759752,13.8670209608972,11.6988811362535,12.4235792586114,10.4102884104941,15.4625612054951,10.8859320997726,15.6433693866711,19.7770174557809,16.5524890169036,16.4279311627615,16.5742518112529,10.5699652829207,17.5773444434162,6.01071942015551,14.5148951932788,15.8567063859664,16.7698931705672,5.33283298718743],null,null,{"interactive":true,"className":"","stroke":true,"color":["c","b","a","e","d","c","c","b","e","a","a","b","a","b","c","a","c","e","d","e"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["c","b","a","e","d","c","c","b","e","a","a","b","a","b","c","a","c","e","d","e"],"fillOpacity":0.2},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPopups","args":[57.7662381436676,-23.8489389047027,"Random popup",null,null,{"maxWidth":300,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"className":""}]}],"limits":{"lat":[-55.5043270066381,59.4947509467602],"lng":[-160.678998213261,179.482292504981]}},"evals":[],"jsHooks":[]}</script>
-<p class="caption">
-Map of completely random data
-</p>
-</div>
-<pre class="r"><code>data %&gt;% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>In progress…</p>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>What have you learned? Are there any broader implications?</p>
+<p>In progress…</p>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
@@ -689,6 +614,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {
