@@ -1,5 +1,5 @@
 ---
-title: "COPMARISON OF DIFFERENT CLIMATE DATASETS"
+title: "COPMARISON OF DIFFERENT CLIMATE DATASETS" 
 author: Nima Masoudvaziri, Zolal Ayazpour
 output: 
   html_document:
