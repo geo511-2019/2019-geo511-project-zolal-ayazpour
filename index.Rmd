@@ -176,6 +176,20 @@ if(runn){
 }
 ```
 
+```{r message=F, warning=F, results='hide'}
+library(rnoaa)
+library(xts)
+library(dygraphs)
+
+d=meteo_tidy_ghcnd("USW00014733",
+                   date_min = "2018-01-01", 
+                   date_max = "2018-12-31", 
+                   var = c("TMAX","TMIN","TAVG"),
+                   keep_flags=T) %>% 
+  select(c(2,12:14)) %>% 
+  mutate(tavg=tavg/10,tmin=tmin/10,tmax=tmax/10) %>% 
+  mutate(date=as.Date(date))
+```
 # Results
 
 In progress...
