@@ -176,6 +176,76 @@ if(runn){
 }
 ```
 
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
+setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
+
+library(rasterVis)
+library(dplyr)
+library(raster)
+library(rgdal) 
+library(ggpubr)
+library(sf)
+
+us <- st_read("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/tl_2017_us_state/tl_2017_us_state.shp")
+
+ny_bound <- us %>% 
+  filter(STUSPS=="NY")
+
+#Raster
+monthly_mean_ERA5= list()
+monthly_min_ERA5= list()
+monthly_max_ERA5= list()
+monthly_mean_HRRR= list()
+monthly_min_HRRR= list()
+monthly_max_HRRR= list()
+monthly_mean_HRRR_resample=list()
+monthly_min_HRRR_resample=list()
+monthly_max_HRRR_resample=list()
+monthly_mean_Diff=list()
+monthly_min_Diff=list()
+monthly_max_Diff=list()
+
+for (M in c(1:12)){
+  monthly_mean_ERA5[M] = raster(paste0(getwd(),'/Data/monthly_mean_ERA5_',M,'.tif'))
+  offs(monthly_mean_ERA5[[M]])=-273.15
+  monthly_min_ERA5[M] = raster(paste0(getwd(),'/Data/monthly_min_ERA5_',M,'.tif'))
+  offs(monthly_min_ERA5[[M]])=-273.15
+  monthly_max_ERA5[M] = raster(paste0(getwd(),'/Data/monthly_max_ERA5_',M,'.tif'))
+  offs(monthly_max_ERA5[[M]])=-273.15
+  
+  monthly_mean_HRRR[M] = raster(paste0(getwd(),'/Data/monthly_mean_HRRR_',M,'.tif'))
+  monthly_min_HRRR[M] = raster(paste0(getwd(),'/Data/monthly_min_HRRR_',M,'.tif'))
+  monthly_max_HRRR[M] = raster(paste0(getwd(),'/Data/monthly_max_HRRR_',M,'.tif'))
+  
+  monthly_mean_HRRR_resample[M] <- resample(monthly_mean_HRRR[[M]],monthly_mean_ERA5[[M]],method="bilinear")
+  monthly_min_HRRR_resample[M] <- resample(monthly_min_HRRR[[M]],monthly_min_ERA5[[M]],method="bilinear")
+  monthly_max_HRRR_resample[M] <- resample(monthly_max_HRRR[[M]],monthly_max_ERA5[[M]],method="bilinear")
+  
+  monthly_mean_Diff[M] <- monthly_mean_HRRR_resample[[M]]-monthly_mean_ERA5[[M]]
+  monthly_min_Diff[M] <- monthly_min_HRRR_resample[[M]]-monthly_min_ERA5[[M]]
+  monthly_max_Diff[M] <- monthly_max_HRRR_resample[[M]]-monthly_max_ERA5[[M]]
+}
+
+# comparing resolutions
+p1=gplot(mask(crop(monthly_mean_HRRR[[3]],extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_gradientn(colours = terrain.colors(10),limits=c(-10,10))+
+  xlab(NULL)+
+  ylab(NULL)+
+  guides(fill=guide_legend(title = "Temperature"))
+
+p2=gplot(mask(crop(monthly_mean_ERA5[[3]],extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_gradientn(colours = terrain.colors(10),limits=c(-10,10))+
+  xlab(NULL)+
+  ylab(NULL)+
+  guides(fill=guide_legend(title = "Temperature"))
+
+ggarrange(p1,p2,nrow=1)
+```
+
+# Results
+
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 library(dplyr)
 library(rnoaa)
@@ -293,9 +363,64 @@ dygraph(ts_mean[,c(2:4)],main="Daily Average Temperature in Buffalo, NY") %>%
 
 ```
 
-# Results
 
-In progress...
+
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
+setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
+
+library(dplyr)
+library(raster)
+library(rgdal) 
+library(ggpubr)
+library(sf)
+
+# rasters of difference between HRRR and ERA5 (3x12)
+ls_names=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+monthly_mean_Diff_brick=brick(monthly_mean_Diff)
+names(monthly_mean_Diff_brick)=ls_names
+plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4,col=terrain.colors(10))
+
+monthly_min_Diff_brick=brick(monthly_min_Diff)
+names(monthly_min_Diff_brick)=ls_names
+plot(mask(monthly_min_Diff_brick,ny_bound),nr=4)
+
+monthly_max_Diff_brick=brick(monthly_max_Diff)
+names(monthly_max_Diff_brick)=ls_names
+plot(mask(monthly_max_Diff_brick,ny_bound),nr=4)
+```
+
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
+setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
+
+library(dplyr)
+library(raster)
+library(rgdal) 
+library(ggpubr)
+library(sf)
+# comparing resample methods (from fine to coarse and vise versa)
+HERRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
+monthly_mean_Diff_1 <- HERRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
+
+ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
+monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
+
+p1=gplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_gradientn(colours = terrain.colors(10))+
+  xlab(NULL)+
+  ylab(NULL)+
+  guides(fill=guide_legend(title = "Temperature"))
+
+p2=gplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_gradientn(colours = terrain.colors(10))+
+  xlab(NULL)+
+  ylab(NULL)+
+  guides(fill=guide_legend(title = "Temperature"))
+
+ggarrange(p1,p2,nrow=1)
+```
 
 # Conclusions
 
