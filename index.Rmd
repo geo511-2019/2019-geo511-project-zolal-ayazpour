@@ -29,7 +29,7 @@ Also, observations from weather stations can be found from [NOAA LCD Tool](https
 
 ### Methods
 
-The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for two years. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and statistical characteristics of them are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over two years as a gif using gganimate package to provide a general understanding of the models' outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.
+The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and their statistical characteristics are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over the year 2018 as a gif using gganimate package to provide a general understanding of the models' outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.
 
 
 ### Preprocessing
@@ -176,20 +176,123 @@ if(runn){
 }
 ```
 
-```{r message=F, warning=F, results='hide'}
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
+library(dplyr)
 library(rnoaa)
 library(xts)
 library(dygraphs)
+library(gridExtra)
+library(ggplot2)
 
-d=meteo_tidy_ghcnd("USW00014733",
-                   date_min = "2018-01-01", 
-                   date_max = "2018-12-31", 
-                   var = c("TMAX","TMIN","TAVG"),
-                   keep_flags=T) %>% 
+HRRR_df <- read.csv2(paste0('C:\\Users\\ovpr.nimamaso\\Box\\Desktop\\',
+                            'GEO511 - Spatial Data Science\\Project\\Zolal_complete_data',
+                            '\\daily_df_HRRR.csv'))
+ERA5_df <- read.csv2(paste0('C:\\Users\\ovpr.nimamaso\\Box\\Desktop\\',
+                            'GEO511 - Spatial Data Science\\Project\\Zolal_complete_data',
+                            '\\daily_df_ERA5.csv')) %>% 
+  mutate(Mean=Mean-273.15,Min=Min-273.15,Max=Max-273.15)
+
+station_df=meteo_tidy_ghcnd("USW00014733",
+                            date_min = "2018-01-01", 
+                            date_max = "2018-12-31", 
+                            var = c("TMAX","TMIN","TAVG"),
+                            keep_flags=T) %>% 
   select(c(2,12:14)) %>% 
   mutate(tavg=tavg/10,tmin=tmin/10,tmax=tmax/10) %>% 
-  mutate(date=as.Date(date))
+  mutate(date=as.Date(date)) %>% 
+  select(c(1,2,4,3))
+
+dfs<- data.frame(Date=as.Date(0:364, origin='2018-01-01'),
+                 Mean=numeric(365),
+                 Min=numeric(365),
+                 Max=numeric(365))
+for(i in 1:nrow(station_df)){
+  dfs[i,2:4]=station_df[i,2:4]
+}
+
+p_h_avg <- ggplot()+
+  geom_line(data=HRRR_df, aes(x=as.Date(HRRR_df[,2]), y=HRRR_df[,3], color='HRRR'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,2], color='Station'))+
+  labs(title='Average Temperature: HRRR vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('firebrick','royalblue'),
+                     labels = c("HRRR", "Station"),
+                     guide = "legend")
+
+p_h_min <- ggplot()+
+  geom_line(data=HRRR_df, aes(x=as.Date(HRRR_df[,2]), y=HRRR_df[,4], color='HRRR'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,3], color='Station'))+
+  labs(title='Minimum Temperature: HRRR vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('firebrick','royalblue'),
+                     labels = c("HRRR", "Station"),
+                     guide = "legend")
+p_h_max <- ggplot()+
+  geom_line(data=HRRR_df, aes(x=as.Date(HRRR_df[,2]), y=HRRR_df[,5], color='HRRR'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,4], color='Station'))+
+  labs(title='Maximum Temperature: HRRR vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('firebrick','royalblue'),
+                     labels = c("HRRR", "Station"),
+                     guide = "legend")
+
+p_e_avg <- ggplot()+
+  geom_line(data=ERA5_df, aes(x=as.Date(ERA5_df[,2]), y=ERA5_df[,3], color='ERA5'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,2], color='Station'))+
+  labs(title='Average Temperature: ERA5 vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('limegreen','royalblue'),
+                     labels = c("ERA5", "Station"),
+                     guide = "legend")
+p_e_min <- ggplot()+
+  geom_line(data=ERA5_df, aes(x=as.Date(ERA5_df[,2]), y=ERA5_df[,4], color='ERA5'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,3], color='Station'))+
+  labs(title='Minimum Temperature: ERA5 vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('limegreen','royalblue'),
+                     labels = c("ERA5", "Station"),
+                     guide = "legend")
+p_e_max <- ggplot()+
+  geom_line(data=ERA5_df, aes(x=as.Date(ERA5_df[,2]), y=ERA5_df[,5], color='ERA5'))+
+  geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,4], color='Station'))+
+  labs(title='Maximum Temperature: ERA5 vs Weather Station',
+       x='Date', y= 'Temperature [C]', colour='Data Source')+
+  scale_color_manual(values= c('limegreen','royalblue'),
+                     labels = c("ERA5", "Station"),
+                     guide = "legend")
+
+grid.arrange(p_h_avg,p_e_avg,
+             p_h_min,p_e_min,
+             p_h_max,p_e_max,
+             nrow=3)
+
+# Plots<- list()
+# for(i in c(1:3)){
+#   for(j in c(1:2)){
+#     p = ggplot()+
+#       geom_line(data=ls_df[[j]], aes(x=as.Date(ls_df[[j]][,2]), y=ls_df[[j]][,(i+2)]),
+#                 color=ls_color[j])+
+#       geom_line(data=dfs, aes(x=as.Date(dfs[,1]), y=dfs[,(i+1)]),
+#                 color=ls_color[3])
+#     Plots[[(i-1)*2+j]] = p
+#     print((i-1)*2+j)
+#   }
+# }
+# grid.arrange(grobs=Plots, nrow=3)
 ```
+```{r message=F, warning=F, fig.width=8, fig.height=5}
+ts_mean<- xts(cbind(station_df$date,HRRR_df$Mean,ERA5_df$Mean,station_df$tavg),
+              order.by=station_df$date)
+
+dygraph(ts_mean[,c(2:4)],main="Daily Average Temperature in Buffalo, NY") %>%
+  dySeries("V1",label="HRRR") %>% 
+  dySeries("V2",label="ERA5") %>% 
+  dySeries("V3",label="Weather Station") %>% 
+  dyRangeSelector(dateWindow=c("2018-01-01", "2018-12-31")) %>% 
+  dyOptions(colors=c("indianred","mediumseagreen","royalblue"))
+
+```
+
 # Results
 
 In progress...
