@@ -10,7 +10,7 @@ output:
 When studying atmospheric-related phenomena, one may use observations (like data from weather stations) or simulated datasets based on numerical models. Also, one may want to investigate and explore a phenomenon or behavior which has happened already in the past, or may be interested in prediction of an event or behavior. As a result, different datasets should be incorporated given the nature of the study.
 Essentially, there are three types of models: Forecast, Analysis and Reanalysis. Forecast models are comprised of physics-based equations and propogate an atmospheric state forward in time, i.e. given the vaules of different parameters at time t, one can calculate the values for time t+dt. Analysis basically does the same thing, however instead of the prediction by physics, it takes place by statistical methods. In other words, given the observations at some locations, one can come up with an estimation for different parameters at locations that there is no observation available. There are different physics-based models and also different assumptions and methodologies in data assimilation, which experience modifications along the time. Besides, instrumnetation also changes as time passes and technology improves. Reanalysis takes all these variations into account and yield a comprehensive and coherent dataset over the globe. It is supposedly the best dataset for looking into the past weather. More infomation can be found [here](https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf).
 
-# Definition of the Problem
+# Definition of the Problem 
 For this study, among different publicly available models, two will be considered. The main objective of the work is to compare their dataset for some primary climatological variables (precipitation, temperature, wind, snow), within both temporal and spatial scopes.
 One of the models is called High Resolution Rapid Refresh (HRRR) which is a forecast model (with forecast length of 18 hours) generating data to a 3-km resolution grid, hourly. More information about HRRR can be find [here](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html). The other model to use is ERA5 which is a climate reanlysis dataset of up to 3 month before  with 30-km resolution at an hourly frequency. More information about ERA5 dataset can be found [here](https://confluence.ecmwf.int/display/CKB/ERA5). Summry of the models are provided in the following table.
 
@@ -21,7 +21,7 @@ One of the models is called High Resolution Rapid Refresh (HRRR) which is a fore
   
   The main reason for choosing these two models is that one of them has a significantly higher resolution and, on the other hand, the other is supposedly based on a more powerful model.
 
-# Materials and methods
+# Materials and methods 
 ### Materials
 
 Each model has its own archive and support, accessible by public. HRRR data can be found following [this instruction](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi), and ERA5 can be downloaded following [this instruction](https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5).
@@ -244,7 +244,7 @@ p2=gplot(mask(crop(monthly_mean_ERA5[[3]],extent(ny_bound)),ny_bound))+
 ggarrange(p1,p2,nrow=1)
 ```
 
-# Results
+# Results 
 
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 library(dplyr)
