@@ -32,15 +32,27 @@ Also, observations from weather stations can be found from [NOAA LCD Tool](https
 The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and their statistical characteristics are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over the year 2018 as a gif using gganimate package to provide a general understanding of the models' outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.
 
 
-### Preprocessing
+### Packages
 Here is the required packages to preprocess the data.
 ```{r, message=F, warning=F}
 library(raster)     # managing rasters
 library(rgdal)      # managing rasters
+library(sf)         # managing rasters
 library(lubridate)  # managing date formats
+library(dplyr)      # managing data
+library(ggplot2)    # plots
+library(ggpubr)     # plots
+library(rasterVis)  # plots
+library(xts)        # timeseries plots
+library(dygraphs)   # timeseries plots
+library(gridExtra)  # timeseries plots
+library(rnoaa)      # NOAA data
+
+
 knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
+### Preprocessing
 The following code loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
 User should input the year, name of the variable, coordinates of the weather station and directory of the files.
 ```{r message=F, warning=F, results='hide'}
@@ -176,17 +188,10 @@ if(runn){
 }
 ```
 
+### Visualiziation of HRRR and ERA5
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
-setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
 
-library(rasterVis)
-library(dplyr)
-library(raster)
-library(rgdal) 
-library(ggpubr)
-library(sf)
-
-us <- st_read("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/tl_2017_us_state/tl_2017_us_state.shp")
+us <- st_read("./Data/tl_2017_us_state/tl_2017_us_state.shp")
 
 ny_bound <- us %>% 
   filter(STUSPS=="NY")
@@ -247,19 +252,9 @@ ggarrange(p1,p2,nrow=1)
 # Results
 
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
-library(dplyr)
-library(rnoaa)
-library(xts)
-library(dygraphs)
-library(gridExtra)
-library(ggplot2)
 
-HRRR_df <- read.csv2(paste0('C:\\Users\\ovpr.nimamaso\\Box\\Desktop\\',
-                            'GEO511 - Spatial Data Science\\Project\\Zolal_complete_data',
-                            '\\daily_df_HRRR.csv'))
-ERA5_df <- read.csv2(paste0('C:\\Users\\ovpr.nimamaso\\Box\\Desktop\\',
-                            'GEO511 - Spatial Data Science\\Project\\Zolal_complete_data',
-                            '\\daily_df_ERA5.csv')) %>% 
+HRRR_df <- read.csv2(paste0('./Data/daily_df_HRRR.csv'))
+ERA5_df <- read.csv2(paste0('./Data/daily_df_ERA5.csv')) %>% 
   mutate(Mean=Mean-273.15,Min=Min-273.15,Max=Max-273.15)
 
 station_df=meteo_tidy_ghcnd("USW00014733",
@@ -364,15 +359,8 @@ dygraph(ts_mean[,c(2:4)],main="Daily Average Temperature in Buffalo, NY") %>%
 ```
 
 
-
+### Difference between HRRR and ERA5 - Monthly Average Temperature
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
-setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
-
-library(dplyr)
-library(raster)
-library(rgdal) 
-library(ggpubr)
-library(sf)
 
 # rasters of difference between HRRR and ERA5 (3x12)
 ls_names=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
@@ -380,24 +368,25 @@ ls_names=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 monthly_mean_Diff_brick=brick(monthly_mean_Diff)
 names(monthly_mean_Diff_brick)=ls_names
 plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4,col=terrain.colors(10))
+```
 
+### Difference between HRRR and ERA5 - Monthly Minimum Temperature
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 monthly_min_Diff_brick=brick(monthly_min_Diff)
 names(monthly_min_Diff_brick)=ls_names
 plot(mask(monthly_min_Diff_brick,ny_bound),nr=4)
+```
 
+### Difference between HRRR and ERA5 - Monthly Maximum Temperature
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 monthly_max_Diff_brick=brick(monthly_max_Diff)
 names(monthly_max_Diff_brick)=ls_names
 plot(mask(monthly_max_Diff_brick,ny_bound),nr=4)
 ```
 
+### Resample from fine to coarse, or coarse to fine?
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
-setwd("/Users/zolalzzz/Documents/Main/PhD/Fall2019/SpatialDataScience/Project/Complete")
 
-library(dplyr)
-library(raster)
-library(rgdal) 
-library(ggpubr)
-library(sf)
 # comparing resample methods (from fine to coarse and vise versa)
 HERRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
 monthly_mean_Diff_1 <- HERRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
@@ -407,10 +396,10 @@ monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
 
 p1=gplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound))+ 
   geom_tile( aes( fill=value ) )+
-  scale_fill_gradientn(colours = terrain.colors(10))+
+  scale_fill_continuous(type = "viridis",name="Temperature")+
   xlab(NULL)+
-  ylab(NULL)+
-  guides(fill=guide_legend(title = "Temperature"))
+  ylab(NULL)
+  #guides(fill=guide_legend(title = "Temperature"))
 
 p2=gplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound))+ 
   geom_tile( aes( fill=value ) )+
