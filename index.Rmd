@@ -232,19 +232,42 @@ for (M in c(1:12)){
 }
 
 # comparing resolutions
-p1=gplot(mask(crop(monthly_mean_HRRR[[3]],extent(ny_bound)),ny_bound))+ 
+p1=gplot(mask(crop(monthly_mean_HRRR[[10]],extent(ny_bound)),ny_bound))+ 
   geom_tile( aes( fill=value ) )+
-  scale_fill_gradientn(colours = terrain.colors(10),limits=c(-10,10))+
+  scale_fill_continuous(type='viridis',name="Temperature")+
   xlab(NULL)+
-  ylab(NULL)+
-  guides(fill=guide_legend(title = "Temperature"))
+  ylab(NULL)
 
-p2=gplot(mask(crop(monthly_mean_ERA5[[3]],extent(ny_bound)),ny_bound))+ 
+p2=gplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound))+ 
   geom_tile( aes( fill=value ) )+
-  scale_fill_gradientn(colours = terrain.colors(10),limits=c(-10,10))+
+  scale_fill_continuous(type='viridis',name="Temperature")+
   xlab(NULL)+
-  ylab(NULL)+
-  guides(fill=guide_legend(title = "Temperature"))
+  ylab(NULL)
+
+ggarrange(p1,p2,nrow=1)
+```
+
+### Resample from fine to coarse, or coarse to fine?
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
+
+# comparing resample methods (from fine to coarse and vise versa)
+HERRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
+monthly_mean_Diff_1 <- HERRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
+
+ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
+monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
+
+p1=gplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_continuous(type = "viridis",name="Temperature")+
+  xlab(NULL)+
+  ylab(NULL)
+
+p2=gplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound))+ 
+  geom_tile( aes( fill=value ) )+
+  scale_fill_continuous(type = "viridis",name="Temperature")+
+  xlab(NULL)+
+  ylab(NULL)
 
 ggarrange(p1,p2,nrow=1)
 ```
@@ -367,7 +390,7 @@ ls_names=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 
 monthly_mean_Diff_brick=brick(monthly_mean_Diff)
 names(monthly_mean_Diff_brick)=ls_names
-plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4,col=terrain.colors(10))
+plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4)
 ```
 
 ### Difference between HRRR and ERA5 - Monthly Minimum Temperature
@@ -382,33 +405,6 @@ plot(mask(monthly_min_Diff_brick,ny_bound),nr=4)
 monthly_max_Diff_brick=brick(monthly_max_Diff)
 names(monthly_max_Diff_brick)=ls_names
 plot(mask(monthly_max_Diff_brick,ny_bound),nr=4)
-```
-
-### Resample from fine to coarse, or coarse to fine?
-```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
-
-# comparing resample methods (from fine to coarse and vise versa)
-HERRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
-monthly_mean_Diff_1 <- HERRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
-
-ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
-monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
-
-p1=gplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_continuous(type = "viridis",name="Temperature")+
-  xlab(NULL)+
-  ylab(NULL)
-  #guides(fill=guide_legend(title = "Temperature"))
-
-p2=gplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_gradientn(colours = terrain.colors(10))+
-  xlab(NULL)+
-  ylab(NULL)+
-  guides(fill=guide_legend(title = "Temperature"))
-
-ggarrange(p1,p2,nrow=1)
 ```
 
 # Conclusions
