@@ -55,6 +55,12 @@ knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
 ## Preprocessing
+
+```{r message=F, warning=F, results='hide', fig.width=8, fig.height=4}
+img <- readPNG("./Data/Framework.png")
+grid::grid.raster(img)
+```
+
 The following code loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
 User should input the year, name of the variable, coordinates of the weather station and directory of the files.
 ```{r message=F, warning=F, results='hide'}
@@ -111,11 +117,6 @@ if(runn){
 
 The following code loads the HRRR data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains a raster (correponding to an hour of a day) for the variable that you specify.
 Again, user should input the year, name of the variable, coordinates of the weather station and directory of the files.
-
-```{r message=F, warning=F, results='hide', fig.width=8, fig.height=4}
-img <- readPNG("./Data/Framework.png")
-grid::grid.raster(img)
-```
 
 ```{r message=F, warning=F, results='hide'}
 runn=F
