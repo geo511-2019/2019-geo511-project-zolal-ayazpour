@@ -21,7 +21,7 @@ One of the models is called High Resolution Rapid Refresh (HRRR) which is a fore
   
   The main reason for choosing these two models is that one of them has a significantly higher resolution and, on the other hand, the other is supposedly based on a more powerful model.
 
-# Materials and methods
+# Materials and Methods
 ### Materials
 
 Each model has its own archive and support, accessible by public. HRRR data can be found following [this instruction](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi), and ERA5 can be downloaded following [this instruction](https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5).
@@ -29,7 +29,7 @@ Also, observations from weather stations can be found from [NOAA LCD Tool](https
 
 ### Methods
 
-The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year (2018). They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Among these variables, temperature is studied in this project. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to work with the dataset, first, the hourly dataset is aggregated to produce data at daily and monthly resolution, and their statistical characteristics are calculated. In the next step, the output of both models are visualized as timeseries over the year 2018 to demonstrate their temporal behavior over the time, and they are compared with the weather station dataset as a verification data source. Furthermore, to compare two models spatialy, the output dataset of each model are mapped over the same grid cells. As a result, two raster objects are produced projecting values of temperature on the same grid cells. The difference between both datasets are visualized by mapping the difference over the case study and the monthly average, minimum and maxmimum temperature are plotted applying plotting tools.
+The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year (2018). They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Among these variables, temperature is studied in this project. Using the raster package, the output dataset of both models can be read. Dealing with spatial datasets, in addition to raster package, sf and sp packages are also useful to manage the data. In order to work with the introduced data, first, the hourly datasets are aggregated to produce data at daily and monthly temporal resolution, and their statistical characteristics are calculated. In the next step, the output of both models are visualized as timeseries over the year 2018 to demonstrate their temporal behavior over the time, and they are compared with the weather station dataset as a verification data source. Furthermore, to compare two models spatialy, the output dataset of each model are mapped over the same grid cells. As a result, two raster objects are produced projecting values of temperature on the same grid cells. The difference between both datasets are visualized by mapping the difference over the case study and the monthly average, minimum and maxmimum temperature are plotted applying plotting tools.
 
 ### Packages
 Here is the required packages for this project.
@@ -53,7 +53,7 @@ library(png)        # load png
 knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
-## Preprocessing
+# Preprocessing
 
 This figure illustrates the framework of this study to preprocess the data provided by HRRR and ERA5 models.
 
@@ -261,8 +261,8 @@ ggarrange(p1,p2,nrow=1)
 
 ### Resample from fine to coarse, or coarse to fine?
 
-Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make a difference in a model quality. This question can be answered in different ways based on the application of the data after processing.  
-The figure below shows the difference between two models in both resampling from fine to coarse, or coarse to fine. Since ERA5 model shows better results in this study, and in the scope of this work, it is important to maintain ERA5 dataset without changes, HRRR model is resampled over the ERA5 grid cells.
+Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make difference in the model quality. This question can be answered in different ways based on the application of the data after processing.  
+The figure below shows the difference between two models in both resampling scenarios, from fine to coarse (on left: difference between resampled HRRR raster and its corresponding ERA5 raster) and from coarse to fine (on right: difference between resampled ERA5 and its corresponding HRRR raster). Since ERA5 model shows better results in this study, and in the scope of this work, it is important to maintain ERA5 dataset without changes, HRRR model is resampled over the ERA5 grid cells.
 
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
 
@@ -431,7 +431,7 @@ levelplot(mask(monthly_min_Diff_brick,ny_bound),
 
 # Conclusions
 
-As the result of this study shows, ERA5 model demonstrates a remarkable ability in generating temperature dataset, as a climatological variable, in comparison with HRRR model. Although HRRR model has much finer spatial resolution which supposes to help in building a more powerful model, the output of ERA5 model is proved to be closer to the reality. This statement is verified by comparing the dataset provided by the models with the dataset measured at the weather stations.
+As the result of this study shows, ERA5 model demonstrates a remarkable ability in generating temperature dataset, as a climatological variable, in comparison to HRRR model. Although HRRR model has much finer spatial resolution which supposes to help in building a more powerful model, the output of ERA5 model is proved to be closer to the reality. This statement is verified by comparing the dataset provided by the models with the dataset measured at the weather stations.
 
 # References
 https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf  
