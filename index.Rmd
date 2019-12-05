@@ -43,6 +43,7 @@ library(dplyr)      # managing data
 library(ggplot2)    # plots
 library(ggpubr)     # plots
 library(rasterVis)  # plots
+library(viridisLite)# plots
 library(xts)        # timeseries plots
 library(dygraphs)   # timeseries plots
 library(gridExtra)  # timeseries plots
@@ -53,7 +54,7 @@ library(png)        # load png
 knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
-### Preprocessing
+## Preprocessing
 The following code loads the ERA5 data and preprocesses them, creating the rasters and dataframes that we need for visualization and analysis. Each file of this dataset contains 24 rasters (correponding to 24 hours of a day) for the variable that you specify.
 User should input the year, name of the variable, coordinates of the weather station and directory of the files.
 ```{r message=F, warning=F, results='hide'}
@@ -239,17 +240,36 @@ for (M in c(1:12)){
 }
 
 # comparing resolutions
-p1=gplot(mask(crop(monthly_mean_HRRR[[10]],extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_continuous(type='viridis',name="Temperature")+
-  xlab(NULL)+
-  ylab(NULL)
+# p1=gplot(mask(crop(monthly_mean_HRRR[[10]],extent(ny_bound)),ny_bound))+ 
+#   geom_tile( aes( fill=value ) )+
+#   scale_fill_continuous(type='viridis',name="Temperature")+
+#   xlab(NULL)+
+#   ylab(NULL)+
+#   ggtitle('HRRR (3 km)')
+p1<- levelplot(mask(crop(monthly_mean_HRRR[[10]],extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('HRRR (3 km)'))
 
-p2=gplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_continuous(type='viridis',name="Temperature")+
-  xlab(NULL)+
-  ylab(NULL)
+p2<- levelplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('ERA5 (25 km)'))
+
+ggarrange(p1,p2,nrow=1)
+```
+
+### Resample from fine to coarse, or coarse to fine?
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
+
+# comparing resample methods (from fine to coarse and vise versa)
+HRRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
+monthly_mean_Diff_1 <- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
+
+ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
+monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
+
+p1<- levelplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('Difference by resampled HRRR'))
+
+p2<- levelplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('Difference by resampled ERA5'))
 
 ggarrange(p1,p2,nrow=1)
 ```
@@ -372,47 +392,33 @@ ls_names=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 
 monthly_mean_Diff_brick=brick(monthly_mean_Diff)
 names(monthly_mean_Diff_brick)=ls_names
-plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4)
+levelplot(mask(monthly_mean_Diff_brick,ny_bound),
+          col.regions=viridis)
+# gplot(mask(monthly_mean_Diff_brick,ny_bound))+
+#   geom_tile( aes( fill=value ) )+
+#   scale_fill_continuous(type='viridis',name="Temperature")+
+#   xlab(NULL)+
+#   ylab(NULL)+
+#   facet_wrap(~ variable)
+# plot(mask(monthly_mean_Diff_brick,ny_bound),nr=4)
 ```
 
 ### Difference between HRRR and ERA5 - Monthly Minimum Temperature
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 monthly_min_Diff_brick=brick(monthly_min_Diff)
 names(monthly_min_Diff_brick)=ls_names
-plot(mask(monthly_min_Diff_brick,ny_bound),nr=4)
+levelplot(mask(monthly_min_Diff_brick,ny_bound),
+          col.regions=viridis)
 ```
 
 ### Difference between HRRR and ERA5 - Monthly Maximum Temperature
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 monthly_max_Diff_brick=brick(monthly_max_Diff)
 names(monthly_max_Diff_brick)=ls_names
-plot(mask(monthly_max_Diff_brick,ny_bound),nr=4)
+levelplot(mask(monthly_min_Diff_brick,ny_bound),
+          col.regions=viridis)
 ```
 
-### Resample from fine to coarse, or coarse to fine?
-```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
-
-# comparing resample methods (from fine to coarse and vise versa)
-HERRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
-monthly_mean_Diff_1 <- HERRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
-
-ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
-monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
-
-p1=gplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_continuous(type = "viridis",name="Temperature")+
-  xlab(NULL)+
-  ylab(NULL)
-
-p2=gplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound))+ 
-  geom_tile( aes( fill=value ) )+
-  scale_fill_continuous(type = "viridis",name="Temperature")+
-  xlab(NULL)+
-  ylab(NULL)
-
-ggarrange(p1,p2,nrow=1)
-```
 
 # Conclusions
 
