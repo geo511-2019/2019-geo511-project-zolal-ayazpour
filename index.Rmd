@@ -11,8 +11,8 @@ When studying atmospheric-related phenomena, one may use observations (like data
 Essentially, there are three types of models: Forecast, Analysis and Reanalysis. Forecast models are comprised of physics-based equations and propogate an atmospheric state forward in time, i.e. given the vaules of different parameters at time t, one can calculate the values for time t+dt. Analysis basically does the same thing, however instead of the prediction by physics, it takes place by statistical methods. In other words, given the observations at some locations, one can come up with an estimation for different parameters at locations that there is no observation available. There are different physics-based models and also different assumptions and methodologies in data assimilation, which experience modifications along the time. Besides, instrumnetation also changes as time passes and technology improves. Reanalysis takes all these variations into account and yield a comprehensive and coherent dataset over the globe. It is supposedly the best dataset for looking into the past weather. More infomation can be found [here](https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf).
 
 # Definition of the Problem
-For this study, among different publicly available models, two will be considered. The main objective of the work is to compare their dataset for some primary climatological variables (precipitation, temperature, wind, snow), within both temporal and spatial scopes.
-One of the models is called High Resolution Rapid Refresh (HRRR) which is a forecast model (with forecast length of 18 hours) generating data to a 3-km resolution grid, hourly. More information about HRRR can be find [here](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html). The other model to use is ERA5 which is a climate reanlysis dataset of up to 3 month before  with 30-km resolution at an hourly frequency. More information about ERA5 dataset can be found [here](https://confluence.ecmwf.int/display/CKB/ERA5). Summry of the models are provided in the following table.
+For this study, among different publicly available models, two will be considered. The main objective of the work is to compare their dataset for temperature as a primary climatological variable, within both temporal and spatial scopes.
+One of the models is called High Resolution Rapid Refresh (HRRR) which is a forecast model (with forecast length of 18 hours) generating data to a 3-km resolution grid, hourly. More information about HRRR can be find [here](http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html). The other model to use is ERA5 which is a climate reanlysis dataset of up to 3 month before  with 30-km resolution at an hourly frequency. More information about ERA5 dataset can be found [here](https://confluence.ecmwf.int/display/CKB/ERA5). Summary of the models are provided in the following table.
 
 |Model|Type|Resolution|Frequency|
   |-----|----|----------|---------|
@@ -29,8 +29,7 @@ Also, observations from weather stations can be found from [NOAA LCD Tool](https
 
 ### Methods
 
-The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year. They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to compare two models, first, the output dataset of each model needs to be mapped over the same grid cells. As a result, two raster objects will be produced to project values of meteorological parameters on the same grid cells. In the next step, the hourly dataset will be aggregated to produce data at daily and monthly resolution, and their statistical characteristics are calculated and plotted applying ggplot2. In this study, the output of both models will be visualized for each meteorological parameter over the year 2018 as a gif using gganimate package to provide a general understanding of the models' outputs. Furthermore, the difference between both datasets will be investigated by mapping the difference over the case study and visualizing the result as new plots. In addition, the temporal difference behavior between these two models will be studied by plotting both dataset as time series over two years.
-
+The output of HRRR and ERA5 are summarized in GRIB2 and NetCDF formats, respectively. Considering the State of New York as the case study, the output of both models are loaded in the working directory for one year (2018). They are meteorological datasets, including precipitation, temperature, wind, and snow, which are mapped at specific grid cells. Among these variables, temperature is studied in this project. Using the raster package, the output dataset of both models can be read. Dealing with the spatial dataset, in addition to raster package, sf and sp packages are also useful to manage the data. In order to work with the dataset, first, the hourly dataset is aggregated to produce data at daily and monthly resolution, and their statistical characteristics are calculated. In the next step, the output of both models are visualized as timeseries over the year 2018 to demonstrate their temporal behavior over the time, and they are compared with the weather station dataset as a verification data source. Furthermore, to compare two models spatialy, the output dataset of each model are mapped over the same grid cells. As a result, two raster objects are produced projecting values of temperature on the same grid cells. The difference between both datasets are visualized by mapping the difference over the case study and the monthly average, minimum and maxmimum temperature are plotted applying plotting tools.
 
 ### Packages
 Here is the required packages for this project.
@@ -55,6 +54,8 @@ knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
 ```
 
 ## Preprocessing
+
+This figure illustrates the framework of this study to preprocess the data provided by HRRR and ERA5 models.
 
 ```{r message=F, warning=F, results='hide', fig.width=8, fig.height=4}
 img <- readPNG("./Data/Framework.png")
@@ -198,6 +199,8 @@ if(runn){
 ```
 
 ### Visualiziation of HRRR and ERA5
+
+The output of both models are plotted over the New York State in October 2018, as an example, to show their different spatial resolution.
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
 
 us <- st_read("./Data/tl_2017_us_state/tl_2017_us_state.shp")
@@ -256,26 +259,9 @@ p2<- levelplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound),
 ggarrange(p1,p2,nrow=1)
 ```
 
-### Resample from fine to coarse, or coarse to fine?
-```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
-
-# comparing resample methods (from fine to coarse and vise versa)
-HRRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
-monthly_mean_Diff_1 <- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
-
-ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
-monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
-
-p1<- levelplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound),
-          col.regions=viridis, margin=F, main=list('Difference by resampled HRRR'))
-
-p2<- levelplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound),
-          col.regions=viridis, margin=F, main=list('Difference by resampled ERA5'))
-
-ggarrange(p1,p2,nrow=1)
-```
-
 # Results
+
+Timeseries are plotted for Buffalo, NY for daily average, minimum and maximume temperature. In addition, difference between HRRR and ERA5 models are visualized on the map over the New York state for monthly average, minimum and maximum Temperature.
 
 ```{r message=F, warning=F, results='hide', fig.width=10, fig.height=8}
 
@@ -420,9 +406,36 @@ levelplot(mask(monthly_min_Diff_brick,ny_bound),
           col.regions=viridis)
 ```
 
+### Resample from fine to coarse, or coarse to fine?
+
+Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make a difference in a model quality. This question can be answered in different ways based on the application of the data after processing.
+
+```{r message=F, warning=F, results='hide', fig.width=10, fig.height=4}
+
+# comparing resample methods (from fine to coarse and vise versa)
+HRRR_to_ERA5_resample <- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method="bilinear")
+monthly_mean_Diff_1 <- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
+
+ERA5_to_HRRR_resample <- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method="bilinear")
+monthly_mean_Diff_2 <- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
+
+p1<- levelplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('Difference by resampled HRRR'))
+
+p2<- levelplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list('Difference by resampled ERA5'))
+
+ggarrange(p1,p2,nrow=1)
+```
 
 # Conclusions
 
-In progress...
+As the result of this study shows, ERA5 model demonstrates a remarkable ability in generating temperature dataset, as a climatological variable, in comparison with HRRR model. Although HRRR model has much finer spatial resolution which supposes to help in building a more powerful model, the output of ERA5 model is proved to be closer to the reality. This statement is verified by comparing the dataset provided by the models with the dataset measured at the weather stations.
 
 # References
+https://rda.ucar.edu/datasets/ds083.2/docs/Analysis.pdf  
+http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/hrrr_FAQ.html  
+https://confluence.ecmwf.int/display/CKB/ERA5  
+http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/hrrr_download.cgi  
+https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5  
+https://www.ncdc.noaa.gov/cdo-web/datatools/lcd  
