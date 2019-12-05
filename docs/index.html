@@ -639,6 +639,26 @@ p2&lt;- levelplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound),
 ggarrange(p1,p2,nrow=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
 </div>
+<div id="resample-from-fine-to-coarse-or-coarse-to-fine" class="section level3">
+<h3>Resample from fine to coarse, or coarse to fine?</h3>
+<p>Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make a difference in a model quality. This question can be answered in different ways based on the application of the data after processing.<br />
+The figure below shows the difference between two models in both resampling from fine to coarse, or coarse to fine. Since ERA5 model shows better results in this study, and in the scope of this work, it is important to maintain ERA5 dataset without changes, HRRR model is resampled over the ERA5 grid cells.</p>
+<pre class="r"><code># comparing resample methods (from fine to coarse and vise versa)
+HRRR_to_ERA5_resample &lt;- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method=&quot;bilinear&quot;)
+monthly_mean_Diff_1 &lt;- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
+
+ERA5_to_HRRR_resample &lt;- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method=&quot;bilinear&quot;)
+monthly_mean_Diff_2 &lt;- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
+
+p1&lt;- levelplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list(&#39;Difference by resampled HRRR&#39;))
+
+p2&lt;- levelplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound),
+          col.regions=viridis, margin=F, main=list(&#39;Difference by resampled ERA5&#39;))
+
+ggarrange(p1,p2,nrow=1)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+</div>
 </div>
 </div>
 <div id="results" class="section level1">
@@ -721,7 +741,7 @@ grid.arrange(p_h_avg,p_e_avg,
              p_h_min,p_e_min,
              p_h_max,p_e_max,
              nrow=3)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 <pre class="r"><code># Plots&lt;- list()
 # for(i in c(1:3)){
 #   for(j in c(1:2)){
@@ -755,7 +775,7 @@ monthly_mean_Diff_brick=brick(monthly_mean_Diff)
 names(monthly_mean_Diff_brick)=ls_names
 levelplot(mask(monthly_mean_Diff_brick,ny_bound),
           col.regions=viridis)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
 <pre class="r"><code># gplot(mask(monthly_mean_Diff_brick,ny_bound))+
 #   geom_tile( aes( fill=value ) )+
 #   scale_fill_continuous(type=&#39;viridis&#39;,name=&quot;Temperature&quot;)+
@@ -770,7 +790,7 @@ levelplot(mask(monthly_mean_Diff_brick,ny_bound),
 names(monthly_min_Diff_brick)=ls_names
 levelplot(mask(monthly_min_Diff_brick,ny_bound),
           col.regions=viridis)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
 </div>
 <div id="difference-between-hrrr-and-era5---monthly-maximum-temperature" class="section level3">
 <h3>Difference between HRRR and ERA5 - Monthly Maximum Temperature</h3>
@@ -778,25 +798,6 @@ levelplot(mask(monthly_min_Diff_brick,ny_bound),
 names(monthly_max_Diff_brick)=ls_names
 levelplot(mask(monthly_min_Diff_brick,ny_bound),
           col.regions=viridis)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
-</div>
-<div id="resample-from-fine-to-coarse-or-coarse-to-fine" class="section level3">
-<h3>Resample from fine to coarse, or coarse to fine?</h3>
-<p>Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make a difference in a model quality. This question can be answered in different ways based on the application of the data after processing.</p>
-<pre class="r"><code># comparing resample methods (from fine to coarse and vise versa)
-HRRR_to_ERA5_resample &lt;- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method=&quot;bilinear&quot;)
-monthly_mean_Diff_1 &lt;- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
-
-ERA5_to_HRRR_resample &lt;- resample(monthly_mean_ERA5[[10]],monthly_mean_HRRR[[10]],method=&quot;bilinear&quot;)
-monthly_mean_Diff_2 &lt;- monthly_mean_HRRR[[10]]-ERA5_to_HRRR_resample
-
-p1&lt;- levelplot(mask(crop(monthly_mean_Diff_1,extent(ny_bound)),ny_bound),
-          col.regions=viridis, margin=F, main=list(&#39;Difference by resampled HRRR&#39;))
-
-p2&lt;- levelplot(mask(crop(monthly_mean_Diff_2,extent(ny_bound)),ny_bound),
-          col.regions=viridis, margin=F, main=list(&#39;Difference by resampled ERA5&#39;))
-
-ggarrange(p1,p2,nrow=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
 </div>
 </div>
