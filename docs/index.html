@@ -635,15 +635,15 @@ p1&lt;- levelplot(mask(crop(monthly_mean_HRRR[[10]],extent(ny_bound)),ny_bound),
           col.regions=viridis, margin=F, main=list(&#39;HRRR (3 km)&#39;))
 
 p2&lt;- levelplot(mask(crop(monthly_mean_ERA5[[10]],extent(ny_bound)),ny_bound),
-          col.regions=viridis, margin=F, main=list(&#39;ERA5 (25 km)&#39;))
+          col.regions=viridis, margin=F, main=list(&#39;ERA5 (30 km)&#39;))
 
 ggarrange(p1,p2,nrow=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
 </div>
 <div id="resample-from-fine-to-coarse-or-coarse-to-fine" class="section level3">
 <h3>Resample from fine to coarse, or coarse to fine?</h3>
-<p>Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse to fine produces additional data which increases the uncertainty in the problem. On the other hand, resampling from fine to coarse removes lots of data which can make difference in the model quality. This question can be answered in different ways based on the application of the data after processing.<br />
-The figure below shows the difference between two models in both resampling scenarios, from fine to coarse (on left: difference between resampled HRRR raster and its corresponding ERA5 raster) and from coarse to fine (on right: difference between resampled ERA5 and its corresponding HRRR raster). Since ERA5 model shows better results in this study, and in the scope of this work, it is important to maintain ERA5 dataset without changes, HRRR model is resampled over the ERA5 grid cells.</p>
+<p>Working with series of datasets with different spatial resolutions, this is an important question which needs to be wisely answered. Resampling from coarse resolution to finer one means generating artificial data which increases the uncertainty and inaccuracy in the problem. On the other hand, resampling from fine resolution to coarser one smoothes out data which can make difference in the model quality. This question can be answered in different ways based on the application of the data after processing.<br />
+The figure below shows the difference between two models in both resampling scenarios, from fine to coarse (on left: difference between resampled HRRR raster and its corresponding ERA5 raster) and from coarse to fine (on right: difference between resampled ERA5 and its corresponding HRRR raster). Since ERA5 model ended up yielding better results in this study, we concluded to maintain ERA5 dataset without changes, and hence, HRRR model is resampled over the ERA5 grid cells.</p>
 <pre class="r"><code># comparing resample methods (from fine to coarse and vise versa)
 HRRR_to_ERA5_resample &lt;- resample(monthly_mean_HRRR[[10]],monthly_mean_ERA5[[10]],method=&quot;bilinear&quot;)
 monthly_mean_Diff_1 &lt;- HRRR_to_ERA5_resample-monthly_mean_ERA5[[10]]
@@ -803,7 +803,7 @@ levelplot(mask(monthly_min_Diff_brick,ny_bound),
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>As the result of this study shows, ERA5 model demonstrates a remarkable ability in generating temperature dataset, as a climatological variable, in comparison to HRRR model. Although HRRR model has much finer spatial resolution which supposes to help in building a more powerful model, the output of ERA5 model is proved to be closer to the reality. This statement is verified by comparing the dataset provided by the models with the dataset measured at the weather stations.</p>
+<p>As the result of this study shows, ERA5 model demonstrates a remarkable ability in generating temperature dataset, as a climatological variable, in comparison to HRRR model. Although HRRR model has much finer spatial resolution which supposes to help in building a more powerful model, the output of ERA5 model is proved to be closer to the reality. This statement is verified by comparing the dataset provided by the models with the dataset measured at the weather stations. There are two points noteworthy here. First, looking into the difference plots, one find that the range in difference in pixels of maximum and minimum rasters are much wider than the range in the average case. Although it complies with our decision in picking the resampling method, it also indicates that maybe comparing models by these measures are not accurate enough, as we may compare their outliers. Therefore, maybe looking into 10th and 90th percentiles of pixel values (for example) be a better criterion. Moreover, reanalysis models take into account the ground observations (e.g. weather stations) as well. So, maybe looking into a ground truth other than weather stations, yields results with less bias.</p>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
